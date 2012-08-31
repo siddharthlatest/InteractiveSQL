@@ -1,2 +1,8 @@
 # Ignore RA's properties file
 *.properties
+
+# Ignore swp files
+*.swp
+
+# Ignore .htaccess
+.htaccess
