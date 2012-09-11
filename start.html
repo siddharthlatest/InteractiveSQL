@@ -22,6 +22,32 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png">
+    <style type="text/css">
+      .CodeMirror {
+        border: 1px solid #e3e3e3;
+        font-size:16px;
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        border-radius: 4px;
+      }
+.workbench {
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  border-color: #ddd transparent #ddd #ddd;
+  *border-right-color: #ffffff;
+  color: #555555;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-bottom-color: transparent;
+  cursor: default;
+  padding-top:8px;
+  padding-bottom:8px;
+  padding-left:12px;
+  padding-right:12px;
+  text-shadow: 0 3px 3px rgba(0, 0, 0, 0.25);
+}
+    </style>
   </head>
 
   <body style="height:600px;">
@@ -37,7 +63,7 @@
           <a class="brand" href="#">Interactive SQL</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
-              <li><a href="#">Home</a></li>
+              <li><a href="/">Home</a></li>
               <li><a href="about">About</a></li>
             </ul>
           </div><!--/.nav-collapse -->
@@ -47,7 +73,7 @@
 
     <div class="jumbotron masthead" style="height:100%">
       <div class="container">
-         <p>Workbench</p>
+         <p><span class="workbench" style="font-size:30px;font-weight:normal;">Workbench</span></p>
          <div class="tabbable tabs-left">
            <ul class="nav nav-tabs">
              <li class="active"><a href="#query1" data-toggle="tab">Query 1</a></li>
@@ -58,13 +84,40 @@
            </ul>
            <div class="tab-content">
                <div class="tab-pane active" id="query1">
-                 <div class="well">
+                 <div id="queryDiv" class="well">
                    <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Number of pizzas.</p>
                  </div>
-                 <div>
-                   <textarea rows="8">foo</textarea>
+               </div>
+               <div class="tab-pane" id="query2">
+                 <div id="queryDiv" class="well">
+                   <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Number of people.</p>
                  </div>
                </div>
+               <div class="tab-pane" id="query3">
+                 <div id="queryDiv" class="well">
+                   <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Query 3.</p>
+                 </div>
+               </div>
+               <div class="tab-pane" id="query4">
+                 <div id="queryDiv" class="well">
+                   <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Query 4.</p>
+                 </div>
+               </div>
+               <div class="tab-pane" id="query5">
+                 <div id="queryDiv" class="well">
+                   <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Query 5.</p>
+                 </div>
+               </div>
+           </div>
+           <div class="tab-content">
+             <form id="sqlQuery" action="/" method="post">
+               <div class="CodeMirror" style="text-align:left;background-color:white;color:black;">
+                 <textarea id="code" name="code" rows="4">-- SQL Mode</textarea>
+               </div> 
+               <div class="pull-left" id="codeConfigure" style="margin-top:20px;">
+                 <button id="querySubmit" type="submit" class="btn btn-small btn-success" style="font-size:14px;"><i class="icon-play"></i> Run Query</button>
+               </div>
+             </form>
            </div>
          </div>
       </div>
@@ -73,8 +126,46 @@
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="../assets/js/jquery.js"></script>
-    <script src="../assets/js/bootstrap.js"></script>
+    <script src="assets/js/jquery.js"></script>
+    <script src="assets/js/bootstrap.js"></script>
+    <script src="CodeMirror/lib/codemirror.js"></script>
+    <link href="CodeMirror/lib/codemirror.css" rel="stylesheet">
+    <link href="CodeMirror/theme/cobalt.css" rel="stylesheet">
+    <link href="CodeMirror/theme/neat.css" rel="stylesheet">
+    <script src="CodeMirror/mode/javascript/javascript.js"></script>
+    <script src="CodeMirror/mode/mysql/mysql.js"></script>
+    <script>
+        $(document).ready(function() {
+            var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+                mode: "mysql",
+                lineNumbers: true,
+                matchBrackets: true,
+                tabMode: "indent",
+                theme: "neat",
+                lineWrapping: "true",
+                autofocus: "true",
+                indentUnit: 4,
+                autoClearEmptyLines: "true",
+            });
+            var currentQuery = "1";
+            $('a[data-toggle="tab"]').on('shown', function(e) {
+                var elementHref = e.target.href;
+                currentQuery = elementHref[elementHref.length-1];
+                console.log(currentQuery);
+            }); 
+            $("#sqlQuery").submit(function(event) {
+                $("#querySubmit").attr('class', "btn btn-disabled");
+                $("#querySubmit").html("<i class='icon-refresh'></i> Processing");
+                var query$ = $('#sqlQuery');
+                query$.append("<input type='hidden' name='queryID' value='"+currentQuery+"'/>");
+                console.log(query$.serialize());
+                $.post('/sqlScript.php', query$.serialize(), function(data) {
+                    console.log(data);
+                });
+                return false;  // Stop from submitting
+            }); 
+        });
+    </script>
   </body>
 </html>
 
