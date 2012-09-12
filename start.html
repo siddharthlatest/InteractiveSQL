@@ -112,7 +112,7 @@
            <div class="tab-content">
              <form id="sqlQuery" action="/" method="post">
                <div class="CodeMirror" style="text-align:left;background-color:white;color:black;">
-                 <textarea id="code" name="code" rows="4">-- SQL Mode</textarea>
+                 <textarea id="code" name="code" rows="4" style="background:#F5f5f5">-- SQL Mode</textarea>
                </div> 
                <div class="pull-left" id="codeConfigure" style="margin-top:20px;">
                  <button id="querySubmit" type="submit" class="btn btn-small btn-success" style="font-size:14px;"><i class="icon-play"></i> Run Query</button>
@@ -122,6 +122,19 @@
          </div>
       </div>
     </div>
+<!-- Modal -->
+<div class="modal hide" id="result" role="dialog" aria-labelledby="myModalLabel" aria-hidden="false">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="resultheader">Query output</h3>
+  </div>
+  <div id="resultbody" class="modal-body">
+    <p>One fine body…</p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>
 
     <!-- Le javascript
     ================================================== -->
@@ -148,19 +161,24 @@
                 autoClearEmptyLines: "true",
             });
             var currentQuery = "1";
+            var init = 0;
             $('a[data-toggle="tab"]').on('shown', function(e) {
                 var elementHref = e.target.href;
                 currentQuery = elementHref[elementHref.length-1];
                 console.log(currentQuery);
             }); 
             $("#sqlQuery").submit(function(event) {
-                $("#querySubmit").attr('class', "btn btn-disabled");
+                $("#querySubmit").attr('class', "btn disabled");
                 $("#querySubmit").html("<i class='icon-refresh'></i> Processing");
                 var query$ = $('#sqlQuery');
                 query$.append("<input type='hidden' name='queryID' value='"+currentQuery+"'/>");
                 console.log(query$.serialize());
                 $.post('/sqlScript.php', query$.serialize(), function(data) {
                     console.log(data);
+                    $("#resultbody").html(data);
+                    $("#result").modal('show');
+                    //$("#querySubmit").attr('class', "btn btn-small btn-success");
+                    $("#querySubmit").html("<i class='icon-play'></i> Run Query");
                 });
                 return false;  // Stop from submitting
             }); 
