@@ -74,7 +74,7 @@
     <div class="jumbotron masthead" style="height:100%">
       <div class="container">
          <p><span class="workbench" style="font-size:30px;font-weight:normal;">Workbench</span></p>
-         <div class="tabbable tabs-left">
+         <div id="lab-tab" class="tabbable tabs-left">
            <ul class="nav nav-tabs">
              <li class="active"><a href="#lab1" data-toggle="tab">Lab 1</a></li>
              <li><a href="#lab2" data-toggle="tab">Lab 2</a></li>
@@ -180,6 +180,65 @@
     <script src="CodeMirror/mode/mysql/mysql.js"></script>
     <script>
         $(document).ready(function() {
+            $.getJSON('labs.json', function(data) {
+                var labQuery = data;
+                console.log(labQuery);
+                // Add the ul elements for lab tabs
+                var tabs = '<ul class="nav nav-tabs"><li class="active"><a href="#lab1" data-toggle="tab">Lab 1</a></li>';
+                console.log(typeof labQuery[labs]);
+                var labs = 0;
+                for (labs = 2; typeof labQuery[labs] !== 'undefined'; labs++) {
+                    tabs = tabs+'<li><a href="#lab'+labs+'" data-toggle="tab">Lab '+labs+'</a></li>';
+                }
+                labs--;
+                tabs = tabs+'</ul>';
+                console.log("tabs - "+ tabs);
+                var tabContent = '<div class="tab-content">';
+                for (var lb = 1; lb <= labs; lb++) {
+                    if (lb === 1)
+                        tabContent += '<div class="tab-pane active" id="lab'+lb+'"><div class="tabbable"><ul class="nav nav-tabs">';
+                    else
+                        tabContent += '<div class="tab-pane" id="lab'+lb+'"><div class="tabbable"><ul class="nav nav-tabs">';
+                    var queries = 1;
+                    for (; typeof labQuery[lb][queries] !== 'undefined'; queries++) {
+                        if (queries === 1)
+                            tabContent += '<li class="active"><a href="#query'+lb+queries+'" data-toggle="tab">Query '+queries+'</a></li>';
+                        else
+                            tabContent += '<li><a href="#query'+lb+queries+'" data-toggle="tab">Query '+queries+'</a></li>';
+                    }
+                    queries--;
+                    tabContent += '</ul><div class="tab-content">';
+                    for (var qr = 1; qr <= queries; qr++) {
+                        if (qr === 1)
+                            tabContent += '<div class="tab-pane active" id="query'+lb+qr+'">';
+                        else
+                            tabContent += '<div class="tab-pane" id="query'+lb+qr+'">';
+                        tabContent += '<div id="queryDiv" class="well">';
+                        tabContent += '<p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">'+labQuery[lb][qr]+'</p></div></div>';
+                    }
+                    tabContent += '</div></div></div>';
+                }
+                tabContent += '</div>';
+                console.log("tabContent - "+tabContent);
+                var codeeditor = '<div class="tab-content">'+
+                                   '<form id="sqlQuery" action="/" method="post">'+
+                                     '<div class="CodeMirror" style="text-align:left;background-color:white;color:black;">'+
+                                       '<textarea id="code" name="code" rows="4" style="background:#F5f5f5">-- SQL Mode</textarea>'+
+                                     '</div>'+
+                                     '<div class="pull-left" id="runQuery" style="margin-top:20px;">'+
+                                       '<button id="querySubmit" type="submit" class="btn btn-small btn-success" style="font-size:14px;"><i class="icon-play"></i> Run Query</button>'+
+                                     '</div>'+
+                                     '<div class="pull-right" id="sqlMode" style="margin-top:25px;">'+
+                                       '<select name="Query Mode">'+
+                                         '<option>PostgreSQL</option>'+
+                                         '<option>Relational Algebra</option>'+
+                                       '</select>'+
+                                     '</div>'+
+                                   '</form>'+
+                                 '</div>';
+                console.log("editor - "+codeeditor);
+                $('#lab-tab').html(tabs+tabContent+codeeditor);
+            });
             var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
                 mode: "mysql",
                 lineNumbers: true,
