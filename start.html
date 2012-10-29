@@ -75,81 +75,6 @@
       <div class="container">
          <p><span class="workbench" style="font-size:30px;font-weight:normal;">Workbench</span></p>
          <div id="lab-tab" class="tabbable tabs-left">
-           <ul class="nav nav-tabs">
-             <li class="active"><a href="#lab1" data-toggle="tab">Lab 1</a></li>
-             <li><a href="#lab2" data-toggle="tab">Lab 2</a></li>
-             <li><a href="#lab3" data-toggle="tab">Lab 3</a></li>
-             <li><a href="#lab4" data-toggle="tab">Lab 4</a></li>
-             <li><a href="#lab5" data-toggle="tab">Lab 5</a></li>
-           </ul>
-           <div class="tab-content">
-             <div class="tab-pane active" id="lab1">
-               <div class="tabbable">
-                 <ul class="nav nav-tabs">
-                   <li class="active"><a href="#query1" data-toggle="tab">Query 1</a></li>
-                   <li><a href="#query2" data-toggle="tab">Query 2</a></li>
-                   <li><a href="#query3" data-toggle="tab">Query 3</a></li>
-                   <li><a href="#query4" data-toggle="tab">Query 4</a></li>
-                   <li><a href="#query5" data-toggle="tab">Query 5</a></li>
-                 </ul>
-                 <div class="tab-content">
-                   <div class="tab-pane active" id="query1">
-                     <div id="queryDiv" class="well">
-                       <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Number of pizzas.</p>
-                     </div>
-                   </div>
-                   <div class="tab-pane" id="query2">
-                     <div id="queryDiv" class="well">
-                       <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Number of people.</p>
-                     </div>
-                   </div>
-                   <div class="tab-pane" id="query3">
-                     <div id="queryDiv" class="well">
-                       <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Query 3.</p>
-                     </div>
-                   </div>
-                   <div class="tab-pane" id="query4">
-                     <div id="queryDiv" class="well">
-                       <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Query 4.</p>
-                     </div>
-                   </div>
-                   <div class="tab-pane" id="query5">
-                     <div id="queryDiv" class="well">
-                       <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Query 5.</p>
-                     </div>
-                   </div>
-                 </div>
-               </div> <!-- End of tabs-left [Query] -->
-             </div>
-             <div class="tab-pane" id="lab2">
-               <p>lab2</p>
-             </div>
-             <div class="tab-pane" id="lab3">
-               <p>lab3</p>
-             </div>
-             <div class="tab-pane" id="lab4">
-               <p>lab4</p>
-             </div>
-             <div class="tab-pane" id="lab5">
-               <p>lab5</p>
-             </div>
-           </div>
-           <div class="tab-content">
-             <form id="sqlQuery" action="/" method="post">
-               <div class="CodeMirror" style="text-align:left;background-color:white;color:black;">
-                 <textarea id="code" name="code" rows="4" style="background:#F5f5f5">-- SQL Mode</textarea>
-               </div> 
-               <div class="pull-left" id="runQuery" style="margin-top:20px;">
-                 <button id="querySubmit" type="submit" class="btn btn-small btn-success" style="font-size:14px;"><i class="icon-play"></i> Run Query</button>
-               </div>
-               <div class="pull-right" id="sqlMode" style="margin-top:25px;"> 
-                 <select name="Query Mode">
-                   <option>PostgreSQL</option>
-                   <option>Relational Algebra</option>
-                 </select>
-               </div>
-             </form>
-           </div>
          </div>
       </div>
     </div>
@@ -238,22 +163,23 @@
                                  '</div>';
                 console.log("editor - "+codeeditor);
                 $('#lab-tab').html(tabs+tabContent+codeeditor);
+                // Load the code-editor after content is dynamically loaded
+                var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+                    mode: "mysql",
+                    lineNumbers: true,
+                    matchBrackets: true,
+                    tabMode: "indent",
+                    theme: "neat",
+                    lineWrapping: "true",
+                    autofocus: "true",
+                    indentUnit: 4,
+                    autoClearEmptyLines: "true",
+                });
+                var currentQuery = "1";
+                var init = 0;
+                var PSQLText = "-- SQL Mode";
+                var RAText = "// RA Mode";
             });
-            var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-                mode: "mysql",
-                lineNumbers: true,
-                matchBrackets: true,
-                tabMode: "indent",
-                theme: "neat",
-                lineWrapping: "true",
-                autofocus: "true",
-                indentUnit: 4,
-                autoClearEmptyLines: "true",
-            });
-            var currentQuery = "1";
-            var init = 0;
-            var PSQLText = "-- SQL Mode";
-            var RAText = "// RA Mode";
             $('a[data-toggle="tab"]').on('shown', function(e) {
                 var elementHref = e.target.href;
                 currentQuery = elementHref[elementHref.length-1];
