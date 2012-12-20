@@ -1,0 +1,156 @@
+<body bgcolor="white">
+    <div style="text-align: center;"><big><span style="font-weight:
+          bold;">RA Relational Algebra Syntax Guide</span></big><br>
+      <big><span style="font-weight: bold;"></span></big></div>
+    <big><span style="font-weight: bold;"><br>
+        Introduction</span></big><i><br>
+      <br>
+      RA</i> is<i> </i>a relational algebra interpreter that translates
+    relational algebra queries into SQL queries, then executes the SQL
+    on a standard relational database system. RA was developed by <a target="_blank" href="http://www.cs.duke.edu/%7Ejunyang/">Prof.
+      Jun Yang</a> at Duke University. The version of RA we're using for
+    the workbench runs on the PostgreSQL open-source relational database
+    system.<br>
+    <p>The simplest relational algebra expression is one that returns
+      the contents of a single relation: just write "<tt><i>relName</i></tt>",
+
+      where <tt><i>relName</i></tt> is the name of the relation.
+      Relation and attribute names are case-insensitive; for example, <tt>pizzeria</tt>
+      is the same as <tt>PIZZERIA</tt>. Every operator starts with a
+      backslash (<tt>\</tt>). Here is an example of a complex query; it
+      finds all pizzas eaten by at least one person who does not
+      frequent the 'Dominos' pizzeria. </p>
+    <pre>   \project_{pizza} (
+      ((\project_{name} Person)          // all people
+       \diff
+       (\project_{name}                  // people who frequent Dominos
+           \select_{pizzeria='Dominos'}
+                Frequents)               // join with Eats to find pizzas
+      \join Eats));
+</pre>
+    The syntax is insensitive to whitespace, and queries may span
+    multiple lines. Make sure to end your query with a <strong>semi-colon.</strong><br/><big><span style="font-weight: bold;"></span></big><br>
+    <p><big><span style="font-weight: bold;">Operators</span></big><br>
+    </p>
+    <p>RA supports the following relational algebra operators: </p>
+    <ul>
+      <li><tt>\select_{<i>cond</i>}</tt> is the relational selection
+        operator. For example, to select people with name Amy or Ben, we
+        write "<tt>\select_{name='Amy' or name='Ben'} Person</tt>". The
+        syntax for <i>cond</i> follows SQL: string literals can be
+        enclosed in single or double quotes, and boolean operators <tt>and</tt>,
+        <tt>or</tt>, and <tt>not</tt> may be used. Comparison operators
+        <tt>&lt;=</tt>, <tt>&lt;</tt>, <tt>=</tt>, <tt>&gt;</tt>, <tt>&gt;=</tt>,
+        and <tt>&lt;&gt;</tt> work on both string and numeric types.</li>
+      
+      <li><tt>\project_{<i>attr_list</i>}</tt> is the relational
+        projection operator, where <tt><i>attr_list</i></tt> is a
+        comma-separated list of attribute names. For example, to find
+        the pizzas served by Applewood (but without the price
+        information), we write "<tt>\project_{pizza} (\select_{pizzeria='Applewood'} Serves)</tt>". </li>
+    </ul>
+    <ul>
+      <li><tt>\cross</tt> is the relational cross-product operator. For
+        example, to compute the cross-product of <tt>Person</tt> and <tt>Frequents</tt>,
+        we write "<tt>Person \cross Frequents</tt>".<br>
+      </li>
+    </ul>
+    <ul>
+      <li><tt>\join</tt> is the relational natural join operator. For
+        example, to join <tt>Person(name,age,gender)</tt> and <tt>Frequents(name,pizzeria)</tt>
+        enforcing equality on the shared <tt>name</tt> attribute, we
+        simply write <tt>"Person \join Frequents</tt>". Natural join
+        automatically equates all pairs of identically named attributes
+        from its inputs (in this case, <tt>name</tt>), and outputs only
+        one attribute per matching pair. The schema of the result in our
+        example is<tt>(name,age,gender,pizzeria)</tt>.<br>
+      </li>
+    </ul>
+    <ul>
+      <li><tt>\join_{<i>cond</i>}</tt> is the relational theta-join
+        operator. For example, to join the two relations <tt>Person(name,age,gender)</tt>
+        and <tt>Serves(pizzeria,pizza,price)</tt>enforcing that the
+        pizza price is lower than the person's age, we write "<tt>Person \join_{age&gt;price} Serves</tt>". Syntax for <i>cond</i>
+        again follows SQL; see notes above for <tt>\select</tt>. </li>
+    </ul>
+    <ul>
+    <li><tt>\union</tt>, <tt>\diff</tt>, and <tt>\intersect</tt> are
+        the relational union, difference, and intersection operators,
+        respectively. As a trivial example, to compute the union between
+        <tt>Person</tt> and itself, we write "<tt>Person \union Person;</tt>",
+
+
+
+
+
+
+
+
+        which returns the original <tt>Person</tt> relation. To compute
+        the difference between <tt>Person</tt> and itself, we write "<tt>Person \diff Person;</tt>", which returns the empty relation. To
+        compute the intersection between <tt>Person</tt> and itself, we
+        write "<tt>Person \intersect Person;</tt>", which again returns
+        the original <tt>Person</tt> relation. <span style="font-weight: bold;">Warning: </span>RA allows these
+        operators to be applied to any two subexpressions that produce
+        an equal number of attributes, even if the corresponding
+        attribute names don't match. (See also the note about attribute
+        order under<span style="font-weight: bold;"> Limitations</span>
+        below.) This allowance is typical of most SQL implementations
+        but violates the requirements of pure relational algebra. As
+        good practice, and for unambiguous attribute names in the
+        result, we suggest using the <tt>\rename </tt>operator (next)
+        as needed to enforce matching schemas whenever <tt>\union</tt>,
+        <tt>\diff</tt>, or <tt>\intersect</tt> is used.<br>
+      </li>
+    </ul>
+    <ul>
+      <li><tt>\rename_{<i>new_attr_name_list</i>}</tt> is the relational
+        renaming operator, where <tt><i>new_attr_name_list</i></tt> is
+        a comma-separated list of new names, one for each attribute of
+        the input relation. For example, to rename the attributes of
+        relation <tt>Person</tt> and compute the cross-product of <tt>Person</tt>
+        with itself, we write "<tt>\rename_{name1,age1,gender1} Person \cross \rename_{name2,age2,gender2} Person;</tt>". Note we could equivalently write "<tt>\rename_{name1,age1,gender1,name2,age2,gender2} (Person \cross Person);</tt>".</li>
+    </ul>
+    <br/><big><span style="font-weight: bold;">Limitations</span></big><br>
+    <br>
+    Currently, RA has the following limitations:
+    <ul>
+      <li><tt>\rename</tt> only supports renaming of attributes; it does
+        not support renaming of relations. </li>
+    </ul>
+    <ul>
+      <li>RA expressions may yield multiple attributes with the same name, but it is not possible to refer to the ambiguously-named attributes "later" in the expression. If a subexpression yields multiple attributes with the same name and you wish to refer to one or more of them, you must use the <tt>\rename</tt> operator to make them unique.<br>
+      </li>
+    </ul>
+    <ul>
+      <li><span style="color: rgb(0, 0, 0);">The standard </span><tt style="color: rgb(0, 0, 0);"><i>relName</i>.<i>attrName</i></tt><span style="color: rgb(0, 0, 0);"> notation for referencing an
+          attribute is neither needed nor </span><span style="color:
+          rgb(0, 0, 0);">supported. </span>Using the<tt> \rename</tt>
+        operator<span style="color: rgb(0, 0, 0);">, attribute name
+          names can always be made unambiguous.</span>
+        <p></p>
+      </li>
+</ul><ul>
+	<li><span style="color: rgb(0, 0, 0);">As in most SQL
+          implementations, attribute order is relevant in relations and
+          in the result of expressions. This property is significant
+          primarily for set operators, which as mentioned above do not
+          consider attribute names. For example, if we take the </span><tt>\union</tt><span style="font-family: monospace;"></span> of relations <tt>R(A,B)</tt>
+        and <tt>S(B,A)</tt>, the result contains two columns: (1) the
+        union of the <tt>A</tt> values in <tt>R</tt> and the <tt>B</tt>
+        values in <tt>S</tt>; (2) the union of the <tt>B</tt> values
+        in <tt>R</tt> and the <tt>A</tt> values in <tt>S</tt>. As
+        mentioned above, as good practice we suggest using the <tt>\rename</tt> operator to enforce matching schemas on <tt>R</tt> and <tt>S</tt>
+        before applying the <tt>\union</tt>.<br>
+      </li></ul><ul>
+      <li style="color: rgb(0, 0, 0);"> Error messages in response to
+        ill-formed RA expressions may not be especially meaningful.
+        Recall that RA translates relational algebra expressions into
+        SQL queries. Often an incorrect RA expression simply results in
+        incorrect SQL queries. In these cases, RA just passes back the
+        error messages from the underlying DBMS, without attempting to
+        create RA-specific messages. </li>
+    </ul>
+  
+<br/>
+</body>
