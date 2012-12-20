@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && strtolower($_SERVER['HTTP_X_REQUESTE
         fclose($fh);
         $queryOutput = "RA/sample/".$queryId.'_ra_test.out';
         $correctOutput = "RA/sample/".$queryId.'_ra.out';
-        exec('/usr/java/jdk1.6.0/bin/java -jar RA/ra.jar RA/ra.properties -i RA/in -o '.$queryOutput, $output, $ret);
+        exec('/usr/bin/java -jar RA/ra.jar RA/ra.properties -i RA/in -o '.$queryOutput, $output, $ret);
         for ($i = 5; $i < count($output, 0)-3; $i++) {
             echo $output[$i]."<br>";
         }

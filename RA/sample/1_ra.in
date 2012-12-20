@@ -1,0 +1,2 @@
+\project_{pizza}
+    \select_{gender = 'female' and age > 20}(Person \join Eats);
