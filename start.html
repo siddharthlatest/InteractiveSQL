@@ -50,7 +50,7 @@
     </style>
   </head>
 
-  <body style="height:600px;">
+  <body style="height:700px;">
 
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
@@ -73,8 +73,67 @@
 
     <div class="jumbotron masthead" style="height:100%">
       <div class="container">
-         <p><span class="workbench" style="font-size:30px;font-weight:normal;">Workbench</span></p>
-         <div id="lab-tab" class="tabbable tabs-left">
+         <div style="font-size:14px; text-align:left">
+           <p style="font-size:14px;text-align:left">We've created a small sample database to use for this assignment. It contains four relations:
+<pre style="text-align:left">Person(name, age, gender)       // name is a key
+Frequents(name, pizzeria)       // [name,pizzeria] is a key
+Eats(name, pizza)               // [name,pizza] is a key
+Serves(pizzeria, pizza, price)  // [pizzeria,pizza] is a key
+</pre>
+<strong>Instructions</strong>: You can execute the queries using Relational Algebra or SQL queries. Since Relational Algebra symbols aren't readily available on most of the keyboards, refer to this <u><a href="/syntaxguide.html" target="_blank">syntax guide</a></u>. You can also view the <u><a href="/sample.html" target="_blank">database here</a></u>.
+</p>
+         </div>
+         <div class="tabbable tabs-left">
+           <ul class="nav nav-tabs">
+             <li class="active"><a href="#query1" data-toggle="tab">Query 1</a></li>
+             <li><a href="#query2" data-toggle="tab">Query 2</a></li>
+             <li><a href="#query3" data-toggle="tab">Query 3</a></li>
+             <li><a href="#query4" data-toggle="tab">Query 4</a></li>
+             <li><a href="#query5" data-toggle="tab">Query 5</a></li>
+           </ul>
+           <div class="tab-content">
+               <div class="tab-pane active" id="query1">
+                 <div id="queryDiv" class="well">
+                   <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Find all pizzas eaten by at least one female over the age of 20.</p>
+                 </div>
+               </div>
+               <div class="tab-pane" id="query2">
+                 <div id="queryDiv" class="well">
+                   <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Find the names of all females who eat at least one pizza served by Straw Hat. (Note: The pizza need not be eaten at Straw Hat.)</p>
+                 </div>
+               </div>
+               <div class="tab-pane" id="query3">
+                 <div id="queryDiv" class="well">
+                   <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Find all pizzerias that serve at least one pizza for less than $10 that either Amy or Fay (or both) eat.</p>
+                 </div>
+               </div>
+               <div class="tab-pane" id="query4">
+                 <div id="queryDiv" class="well">
+                   <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Find all pizzerias that serve at least one pizza for less than $10 that both Amy and Fay eat.</p>
+                 </div>
+               </div>
+               <div class="tab-pane" id="query5">
+                 <div id="queryDiv" class="well">
+                   <p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">Find the names of all people who eat at least one pizza served by Dominos but who do not frequent Dominos.</p>
+                 </div>
+               </div>
+           </div>
+           <div class="tab-content">
+             <form id="sqlQuery" action="/" method="post">
+               <div class="CodeMirror" style="text-align:left;background-color:white;color:black;">
+                 <textarea id="code" name="code" rows="2" style="background:#F5f5f5">-- SQL Mode</textarea>
+               </div> 
+               <div class="pull-left" id="runQuery" style="margin-top:20px;">
+                 <button id="querySubmit" type="submit" class="btn btn-small btn-success" style="font-size:14px;"><i class="icon-play"></i> Run Query</button>
+               </div>
+               <div class="pull-right" id="sqlMode" style="margin-top:25px;"> 
+                 <select name="Query Mode">
+                   <option selected="selected">Relational Algebra</option>
+                   <option>SQL</option>
+                 </select>
+               </div>
+             </form>
+           </div>
          </div>
       </div>
     </div>
@@ -105,81 +164,21 @@
     <script src="CodeMirror/mode/mysql/mysql.js"></script>
     <script>
         $(document).ready(function() {
-            $.getJSON('labs.json', function(data) {
-                var labQuery = data;
-                console.log(labQuery);
-                // Add the ul elements for lab tabs
-                var tabs = '<ul class="nav nav-tabs"><li class="active"><a href="#lab1" data-toggle="tab">Lab 1</a></li>';
-                console.log(typeof labQuery[labs]);
-                var labs = 0;
-                for (labs = 2; typeof labQuery[labs] !== 'undefined'; labs++) {
-                    tabs = tabs+'<li><a href="#lab'+labs+'" data-toggle="tab">Lab '+labs+'</a></li>';
-                }
-                labs--;
-                tabs = tabs+'</ul>';
-                console.log("tabs - "+ tabs);
-                var tabContent = '<div class="tab-content">';
-                for (var lb = 1; lb <= labs; lb++) {
-                    if (lb === 1)
-                        tabContent += '<div class="tab-pane active" id="lab'+lb+'"><div class="tabbable"><ul class="nav nav-tabs">';
-                    else
-                        tabContent += '<div class="tab-pane" id="lab'+lb+'"><div class="tabbable"><ul class="nav nav-tabs">';
-                    var queries = 1;
-                    for (; typeof labQuery[lb][queries] !== 'undefined'; queries++) {
-                        if (queries === 1)
-                            tabContent += '<li class="active"><a href="#query'+lb+queries+'" data-toggle="tab">Query '+queries+'</a></li>';
-                        else
-                            tabContent += '<li><a href="#query'+lb+queries+'" data-toggle="tab">Query '+queries+'</a></li>';
-                    }
-                    queries--;
-                    tabContent += '</ul><div class="tab-content">';
-                    for (var qr = 1; qr <= queries; qr++) {
-                        if (qr === 1)
-                            tabContent += '<div class="tab-pane active" id="query'+lb+qr+'">';
-                        else
-                            tabContent += '<div class="tab-pane" id="query'+lb+qr+'">';
-                        tabContent += '<div id="queryDiv" class="well">';
-                        tabContent += '<p style="font-size:14px; color:black; text-align:left; margin-bottom:0px;">'+labQuery[lb][qr]+'</p></div></div>';
-                    }
-                    tabContent += '</div></div></div>';
-                }
-                tabContent += '</div>';
-                console.log("tabContent - "+tabContent);
-                var codeeditor = '<div class="tab-content">'+
-                                   '<form id="sqlQuery" action="/" method="post">'+
-                                     '<div class="CodeMirror" style="text-align:left;background-color:white;color:black;">'+
-                                       '<textarea id="code" name="code" rows="4" style="background:#F5f5f5">-- SQL Mode</textarea>'+
-                                     '</div>'+
-                                     '<div class="pull-left" id="runQuery" style="margin-top:20px;">'+
-                                       '<button id="querySubmit" type="submit" class="btn btn-small btn-success" style="font-size:14px;"><i class="icon-play"></i> Run Query</button>'+
-                                     '</div>'+
-                                     '<div class="pull-right" id="sqlMode" style="margin-top:25px;">'+
-                                       '<select name="Query Mode">'+
-                                         '<option>PostgreSQL</option>'+
-                                         '<option>Relational Algebra</option>'+
-                                       '</select>'+
-                                     '</div>'+
-                                   '</form>'+
-                                 '</div>';
-                console.log("editor - "+codeeditor);
-                $('#lab-tab').html(tabs+tabContent+codeeditor);
-                // Load the code-editor after content is dynamically loaded
-                var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-                    mode: "mysql",
-                    lineNumbers: true,
-                    matchBrackets: true,
-                    tabMode: "indent",
-                    theme: "neat",
-                    lineWrapping: "true",
-                    autofocus: "true",
-                    indentUnit: 4,
-                    autoClearEmptyLines: "true",
-                });
-                var currentQuery = "1";
-                var init = 0;
-                var PSQLText = "-- SQL Mode";
-                var RAText = "// RA Mode";
+            var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+                mode: "mysql",
+                lineNumbers: true,
+                matchBrackets: true,
+                tabMode: "indent",
+                theme: "neat",
+                lineWrapping: "true",
+                autofocus: "true",
+                indentUnit: 4,
+                autoClearEmptyLines: "true",
             });
+            var currentQuery = "1";
+            var init = 0;
+            var PSQLText = "-- SQL Mode";
+            var RAText = "// RA Mode";
             $('a[data-toggle="tab"]').on('shown', function(e) {
                 var elementHref = e.target.href;
                 currentQuery = elementHref[elementHref.length-1];
@@ -187,12 +186,14 @@
             });
             $("select").change(function() {
                 var str=$("select option:selected").val();
-                if (str === "PostgreSQL" && init > 0) {
+                if (str === "SQL" && init > 0) {
                     RAText = editor.getValue();	
                     editor.setValue(PSQLText);
+                    editor.setOption("mode", "mysql");
                 } else if (str === "Relational Algebra") {
                     PSQLText = editor.getValue();
                     editor.setValue(RAText);
+                    editor.setOption("mode", "javascript");
                 }
                 init++;
                 console.log("str "+str+ " "+typeof(str));

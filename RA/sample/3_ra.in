@@ -1,0 +1,5 @@
+\project_{Pizzeria} 
+    \select_{price < 10}
+        (Serves \join (\project_{pizza}
+            \select_{name='Amy' or name='Fay'} 
+                (Person \join Eats)));

@@ -6,14 +6,14 @@ if (!$_SERVER['SERVER_ADDR'] == $_SERVER['REMOTE_ADDR']) {
 }
 // Only respond to a post method
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-    if (isset($_POST['queryMode']) && $_POST['queryMode']=='PostgreSQL') {
+    if (isset($_POST['queryMode']) && $_POST['queryMode']=='SQL') {
         // Connect, and start the database
         if (!isset($dbcon))
-            $dbcon = pg_connect("host=localhost dbname=ra user=wwwdata password=yourock9")
+            $dbcon = pg_connect("host=localhost dbname=ra user=apache password=siddarth9123")
                 or die('Could not connect '.pg_last_error());
         // Performing sql query
         $query = $_POST['code'];
-        $result = pg_query($query) or die('Query failed '.pg_last_error());
+        $result = pg_query($query) or die('Query failed '.pg_last_error().'<br/><br/><strong>You are in \'PostgreSQL\' mode. Please change the mode if you are executing a Relational Algebra query.</strong>');
 
         // Printing the result in html
         echo "<table class='table table-striped table-bordered'>\n";
@@ -46,13 +46,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && strtolower($_SERVER['HTTP_X_REQUESTE
         pg_free_result($result);
     } else if (isset($_POST['queryMode']) && $_POST['queryMode'] == 'Relational Algebra') {
         $query = $_POST['code'];
+        $queryId = $_POST['queryID'];
         $fh = fopen("RA/in", "w") or die("Server Error: Can't execute query [Permission Denied]");
+        $query = $query."\n";
         fwrite($fh, $query);
         fclose($fh);
-        //exec('echo "'.$query.'" > RA/in');
-        exec('java -jar RA/ra.jar RA/res/ra/ra.properties -i RA/in', &$output);
+        $queryOutput = "RA/sample/".$queryId.'_ra_test.out';
+        $correctOutput = "RA/sample/".$queryId.'_ra.out';
+        exec('/usr/bin/java -jar RA/ra.jar RA/ra.properties -i RA/in -o '.$queryOutput, $output, $ret);
         for ($i = 5; $i < count($output, 0)-3; $i++) {
             echo $output[$i]."<br>";
+        }
+        exec('diff -cw '.$queryOutput.' '.$correctOutput, $isCorrect);
+        if (count($isCorrect) == 0)
+            echo "<br><strong>Congrats! Your output matches the solution query.</strong>";
+        else {
+            echo "<br>Oops! There seems to some error in your query. Refer to the diff below -<br>";
+            echo "<pre>".implode($isCorrect,"\n")."</pre>";
         }
     }
 } else {
