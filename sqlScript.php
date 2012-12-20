@@ -57,11 +57,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && strtolower($_SERVER['HTTP_X_REQUESTE
         for ($i = 5; $i < count($output, 0)-3; $i++) {
             echo $output[$i]."<br>";
         }
-        exec('diff -cw '.$queryOutput.' '.$correctOutput, $isCorrect);
+        exec('python tester.py '.$queryOutput.' '.$correctOutput, $isCorrect);
         if (count($isCorrect) == 0)
             echo "<br><strong>Congrats! Your output matches the solution query.</strong>";
         else {
-            echo "<br>Oops! There seems to some error in your query. Refer to the diff below -<br>";
+            echo "<br>Oops! Your query did not match the solution query. The rows with mismatch are presented below -<br>";
             echo "<pre>".implode($isCorrect,"\n")."</pre>";
         }
     }
