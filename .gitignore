@@ -3,7 +3,6 @@
 
 # Ignore all data files
 *.out
-*.in
 *.db
 
 # Ignore swp files
