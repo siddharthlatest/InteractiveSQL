@@ -1,6 +1,10 @@
 # Ignore RA's properties file
 *.properties
 
+# Ignore all data files
+*.out
+*.in
+
 # Ignore swp files
 *.swp
 
