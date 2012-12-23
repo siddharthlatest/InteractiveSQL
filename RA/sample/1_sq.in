@@ -1,3 +1,0 @@
--- SQL Mode
-select pizza from person natural join eats where gender = 'female' and age > 20;
-

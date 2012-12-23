@@ -1,3 +1,0 @@
-\project_{name}
-    \select_{gender='female' and pizzeria='Straw Hat'}
-        (Person \join Eats \join Serves);
