@@ -7,8 +7,11 @@ def start():
         content = set(f.readlines())
     with open(sys.argv[1]) as f:
         usercontent = f.readlines()
-    mismatch =  [str(i-1)+". "+usercontent[i] for i in xrange(len(usercontent)-4) if usercontent[i] not in content]
-    if len(mismatch) != 0:
-        print "".join(mismatch),
+    if len(usercontent) > 0 and usercontent[0].startswith("Error"):
+        print "".join(usercontent[:-3]),
+    else:
+        mismatch =  [str(i-1)+". "+usercontent[i] for i in xrange(len(usercontent)-4) if usercontent[i] not in content]
+        if len(mismatch) != 0:
+            print "".join(mismatch),
 
 start()
