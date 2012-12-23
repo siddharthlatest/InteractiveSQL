@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && strtolower($_SERVER['HTTP_X_REQUESTE
             fwrite($fh, implode("|", $results[count($results)-1])."\n");
         }
         fclose($fh);
+        unset($results[count($results)-1]);
         // Printing the result in html
         echo "<table class='table table-striped table-bordered'>\n";
         $i = 0;
@@ -57,14 +58,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && strtolower($_SERVER['HTTP_X_REQUESTE
         $queryOutput = "RA/sample/".$queryId.'_ra_test.out';
         $correctOutput = "RA/sample/".$queryId.'_ra.out';
         exec('/usr/bin/java -jar RA/ra.jar RA/ra.properties -i RA/in -o '.$queryOutput, $output, $ret);
-        for ($i = 5; $i < count($output, 0)-3; $i++) {
-            echo $output[$i]."<br>";
+        echo "<table class='table table-striped table-bordered'>\n";
+        echo "\t<thead>\n\t<tr>\n";
+        $output[5] = substr($output[5], 16, strlen($output[5])-17);
+        $row = explode(",", $output[5]);
+        for ($j = 0; $j < count($row); $j++)
+            echo "<th style='width:250px;'>".$row[$j]."</th>";
+        echo "\t</tr>\n\t</thead>\n\t<tbody>\n";
+        for ($i = 7; $i < count($output, 0)-5; $i++) {
+            $row = explode("|", $output[$i]);
+	    echo "\t<tr>\n";
+            for ($j = 0; $j < count($row); $j++)
+                echo "<td>".$row[$j]."</td>";
+	    echo "\t</tr>\n";
         }
+        echo "\t</tbody>\n</table>";
         exec('python tester.py '.$queryOutput.' '.$correctOutput, $isCorrect);
         if (count($isCorrect) == 0)
             echo "<br><strong>Congrats! Your output matches the solution query.</strong>";
         else {
-            echo "<br>Oops! Your query did not match the solution query. The rows with mismatch are presented below -<br>";
+            echo "<br>Oops! Your query did not match the solution query. Look at the feedback below -<br>";
             echo "<pre>".implode($isCorrect,"\n")."</pre>";
         }
     }
