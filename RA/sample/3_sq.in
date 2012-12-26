@@ -1,0 +1,2 @@
+--SQL mode
+select distinct pizzeria from SERVES NATURAL JOIN EATS where (name='Amy' or name='Fay') and price < 10;

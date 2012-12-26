@@ -1,0 +1,12 @@
+Output schema: (name text)
+-----
+Amy
+Ben
+Dan
+Eli
+Gus
+-----
+Total number of rows: 5
+
+Bye!
+

@@ -1,0 +1,3 @@
+--SQL mode
+select distinct pizzeria from SERVES NATURAL JOIN EATS where name='Amy' and price < 10
+intersect select distinct pizzeria from SERVES NATURAL JOIN EATS where name='Fay' and price < 10;

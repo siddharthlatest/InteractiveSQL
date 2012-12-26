@@ -1,0 +1,2 @@
+--SQL mode
+select name from PERSON natural join eats natural join serves where pizzeria='Straw Hat' and gender='female';

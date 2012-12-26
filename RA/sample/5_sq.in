@@ -1,0 +1,3 @@
+--SQL mode
+select distinct name from EATS NATURAL JOIN SERVES where pizzeria='Dominos'
+EXCEPT select distinct name from FREQUENTS where pizzeria='Dominos' order by name;

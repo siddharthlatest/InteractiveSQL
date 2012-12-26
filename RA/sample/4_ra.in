@@ -1,11 +1,6 @@
-\project_{Pizzeria} 
-    \select_{price < 10}
-        (Serves \join (\project_{pizza}
-            \select_{name='Amy'} 
-                (Person \join Eats)))
-\intersect
-\project_{Pizzeria} 
-    \select_{price < 10}
-        (Serves \join (\project_{pizza}
-            \select_{name='Fay'} 
-                (Person \join Eats)));
+// RA Mode
+\project_{pizzeria} (
+    \select_{price < 10 and name='Amy'} (eats \join serves))
+    \intersect
+        \project_{pizzeria} (
+    \select_{price < 10 and name='Fay'} (eats \join serves));

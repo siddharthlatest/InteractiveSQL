@@ -2,7 +2,7 @@
 *.properties
 
 # Ignore all data files
-*.out
+*test.out
 *.db
 
 # Ignore swp files
