@@ -16,7 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && strtolower($_SERVER['HTTP_X_REQUESTE
         $queryId = $_POST['queryID'];
         $result = pg_query($query) or die('Query failed '.pg_last_error().'<br/><br/><strong>You are in \'PostgreSQL\' mode. Please change the mode if you are executing a Relational Algebra query.</strong>');
         // Writing results to an output file
-        $fh = fopen("RA/sample/".$queryId."_sql_test.out", "w") or die("Server Error: Can't write to a file [Permission Denied]");
+        $queryOutput = "RA/sample/".$queryId.'_sq_test.out';
+        $fh = fopen($queryOutput, "w") or die("Server Error: Can't write to a file [Permission Denied]");
         $results = Array();
         while ($results[] = pg_fetch_row($result)) {
             fwrite($fh, implode("|", $results[count($results)-1])."\n");
@@ -28,8 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && strtolower($_SERVER['HTTP_X_REQUESTE
         $i = 0;
         echo "\t<thead>\n\t<tr>\n";
         while ($i < pg_num_fields($result)) {
-	    $fieldName = pg_field_name($result, $i);
-            echo "\t\t<th style='width:250px;'>$fieldName</th>\n";
+	    $field_name = pg_field_name($result, $i);
+            $field_type = pg_field_type($result, $i);
+            echo "\t\t<th style='width:250px;'>$field_name"." (".$field_type.")</th>\n";
 	    $i = $i + 1;
         }
         echo "\t</tr>\n\t</thead>\n\t<tbody>\n";
@@ -45,7 +47,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && strtolower($_SERVER['HTTP_X_REQUESTE
 	    $i = $i + 1;
         }
         echo "\t</tbody>\n</table>";
-
+        // Compute and print feedback
+        $correctOutput = "RA/sample/".$queryId.'_sq.out';
+        exec('python tester.py '.$queryOutput.' '.$correctOutput, $isCorrect);
+        if (count($isCorrect) == 0)
+            echo "<br><strong>Congrats! Your output matches the solution query.</strong>";
+        else {
+            echo "<br>Oops! Your query did not match the solution query. Look at the feedback below -<br>";
+            echo "<pre><div id='feedbackTop' style='font-weight:bold;'>Incorrect row(-), Missing row(*)\n</div>";
+            echo implode($isCorrect,"\n")."</pre>";
+        }
         // Free result set
         pg_free_result($result);
     } else if (isset($_POST['queryMode']) && $_POST['queryMode'] == 'Relational Algebra') {
@@ -55,12 +66,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && strtolower($_SERVER['HTTP_X_REQUESTE
         $query = $query."\n";
         fwrite($fh, $query);
         fclose($fh);
+        // Execute RA query
         $queryOutput = "RA/sample/".$queryId.'_ra_test.out';
-        $correctOutput = "RA/sample/".$queryId.'_ra.out';
         exec('/usr/bin/java -jar RA/ra.jar RA/ra.properties -i RA/in -o '.$queryOutput, $output, $ret);
+        // Pretty print RA query
         echo "<table class='table table-striped table-bordered'>\n";
         echo "\t<thead>\n\t<tr>\n";
-        $output[5] = substr($output[5], 16, strlen($output[5])-17);
+        if (strncmp($output[5], "Error", strlen("Error")))
+            $output[5] = substr($output[5], 16, strlen($output[5])-17);
         $row = explode(",", $output[5]);
         for ($j = 0; $j < count($row); $j++)
             echo "<th style='width:250px;'>".$row[$j]."</th>";
@@ -73,12 +86,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && strtolower($_SERVER['HTTP_X_REQUESTE
 	    echo "\t</tr>\n";
         }
         echo "\t</tbody>\n</table>";
-        exec('python tester.py '.$queryOutput.' '.$correctOutput, $isCorrect);
+        // Compute and print feedback
+        $correctOutput = "RA/sample/".$queryId.'_ra.out';
+        exec('python tester.py --RA '.$queryOutput.' '.$correctOutput, $isCorrect);
         if (count($isCorrect) == 0)
             echo "<br><strong>Congrats! Your output matches the solution query.</strong>";
         else {
             echo "<br>Oops! Your query did not match the solution query. Look at the feedback below -<br>";
-            echo "<pre>".implode($isCorrect,"\n")."</pre>";
+            echo "<pre><div id='feedbackTop' style='font-weight:bold;'>Incorrect row(-), Missing row(*)\n</div>";
+            echo implode($isCorrect,"\n")."</pre>";
         }
     }
 } else {
