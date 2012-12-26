@@ -13,8 +13,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && strtolower($_SERVER['HTTP_X_REQUESTE
                 or die('Could not connect '.pg_last_error());
         // Performing sql query
         $query = $_POST['code'];
+        $queryId = $_POST['queryID'];
         $result = pg_query($query) or die('Query failed '.pg_last_error().'<br/><br/><strong>You are in \'PostgreSQL\' mode. Please change the mode if you are executing a Relational Algebra query.</strong>');
-
+        // Writing results to an output file
+        $fh = fopen("RA/sample/".$queryId."_sql_test.out", "w") or die("Server Error: Can't write to a file [Permission Denied]");
+        $results = Array();
+        while ($results[] = pg_fetch_row($result)) {
+            fwrite($fh, implode("|", $results[count($results)-1])."\n");
+        }
+        fclose($fh);
         // Printing the result in html
         echo "<table class='table table-striped table-bordered'>\n";
         $i = 0;
@@ -24,17 +31,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && strtolower($_SERVER['HTTP_X_REQUESTE
             echo "\t\t<th style='width:250px;'>$fieldName</th>\n";
 	    $i = $i + 1;
         }
-        echo "\t<tr>\n\t</thead>\n\t<tbody>\n";
+        echo "\t</tr>\n\t</thead>\n\t<tbody>\n";
         $i = 0;
-        while ($row = pg_fetch_row($result)) {
+        while ($i < count($results)) {
 	    echo "\t<tr>\n";
-	    $count = count($row);
 	    $y = 0;
-	    while ($y < $count)
-	    {
-		$c_row = current($row);
-		echo "\t\t<td>$c_row</td>\n";
-		next($row);
+	    while ($y < count($results[$i])) {
+		echo "\t\t<td>".$results[$i][$y]."</td>\n";
 		$y = $y + 1;
 	    }
 	    echo "\t</tr>\n";
